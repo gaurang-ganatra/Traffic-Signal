@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <title>Traffic Signal Control</title> 
+        <link rel="stylesheet" href="style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <h1>Traffic Signal Control</h1>
+        <label>Enter Sequence (e.g 1234)</label>
+        <input type="number" id="sequence" placeholder="Enter Sequence">
+        <br>
+        <label>Enter Green Signal Interval in Seconds:</label>
+        <input type="number" id="greenInterval" placeholder="Enter Interval">
+        <br>
+        <label>Enter Yellow Signal Interval in Seconds:</label>
+        <input type="number" id="yellowInterval" placeholder="Enter Interval">
+        <br>
+        <button onclick="startSignal()">Start</button>
+        <button onclick="stopSignal()">Stop</button>
+        <div id="signalDisplay">
+            <div id="signal_1" class="signal red"></div>
+            <div id="signal_2" class="signal red"></div>
+            <div id="signal_3" class="signal red"></div>
+            <div id="signal_4" class="signal red"></div>
+        </div>
+    </body>
+    <script>
+        var intervalIdGreen,intervalIdYellow;
+        function startSignal()
+        {
+            const arrDigits = Array.from(String($("#sequence").val()), Number);
+            var intGreenInterval = $("#greenInterval").val();
+            var intYellowInterval = $("#yellowInterval").val();
+            if(arrDigits.length !== 4 || new Set(arrDigits).size !==4 || arrDigits.some(item => item < 1 || item > 4)){
+                alert("Please enter digits between 1 to 4 and must not be duplicate.")
+                return ;
+            }
+            if(intGreenInterval <=1 || intYellowInterval <=1)
+            {
+                alert("Interval must be greater than 1.");
+                return ;
+            }
+            var intCurrentIndex = 1;
+            var intGreenSec = 0;
+            var intYellowSec = 0;
+            intervalIdGreen = setInterval(function() { checkGreenInterval(intCurrentIndex); }, 1000);
+            intervalIdYellow = setInterval(function() { checkYellowInterval(intCurrentIndex); }, 1000);
+            function checkGreenInterval(intValue){
+                let intClassValue = arrDigits.indexOf(intValue)+1;
+                if(intGreenSec <= intGreenInterval && intYellowSec == 0)
+                {
+                    $("#signal_"+intClassValue).removeClass('red');
+                    $("#signal_"+intClassValue).addClass('green');
+                    intGreenSec = intGreenSec + 1;
+                }
+            }
+            function checkYellowInterval(intValue){
+                let intClassValue = arrDigits.indexOf(intValue)+1;
+                if(intGreenSec == intGreenInterval && intYellowSec <= intYellowInterval)
+                {
+                    $("#signal_"+intClassValue).removeClass('green');
+                    $("#signal_"+intClassValue).addClass('yellow');
+                    intYellowSec = intYellowSec + 1;
+                }
+                if(intGreenSec == intGreenInterval && intYellowSec == intYellowInterval)
+                {
+                    if(intCurrentIndex == 4)
+                        intCurrentIndex = 1;
+                    else
+                        intCurrentIndex = intCurrentIndex + 1;
+                    intGreenSec = 0;
+                    intYellowSec = 0;
+                    $("#signal_"+intClassValue).removeClass('yellow');
+                    $("#signal_"+intClassValue).addClass('red');
+                }
+            }
+        }
+        function stopSignal()
+        {
+            clearInterval(intervalIdGreen);
+            clearInterval(intervalIdYellow);
+            $("#signal_1").removeClass('yellow green').addClass('red');
+            $("#signal_2").removeClass('yellow green').addClass('red');
+            $("#signal_3").removeClass('yellow green').addClass('red');
+            $("#signal_4").removeClass('yellow green').addClass('red');
+        }
+    </script>
+</html>
